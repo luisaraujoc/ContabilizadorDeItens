@@ -41,41 +41,31 @@ function deletarItem($id) {
 }
 
 // Exportar itens para XLSX
-function exportarItensXLSX() {
-    require_once './autoload.php';
-    
-    // Desativa o uso de cache
-    \PhpOffice\PhpSpreadsheet\Settings::setCache(null);
-    
+function exportarItensCSV() {
     $itens = listarItens();
     
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+    // Configurar headers para download CSV
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="itens.csv"');
     
-    // Cabeçalhos
-    $sheet->setCellValue('A1', 'ID');
-    $sheet->setCellValue('B1', 'Nome');
-    $sheet->setCellValue('C1', 'Categoria');
-    $sheet->setCellValue('D1', 'Quantidade');
-    $sheet->setCellValue('E1', 'Valor');
+    // Criar output stream
+    $output = fopen('php://output', 'w');
     
-    // Dados
-    $row = 2;
+    // Escrever cabeçalhos
+    fputcsv($output, ['ID', 'Nome', 'Categoria', 'Quantidade', 'Valor Unitário'], ';');
+    
+    // Escrever dados
     foreach ($itens as $item) {
-        $sheet->setCellValue('A' . $row, $item['ID']);
-        $sheet->setCellValue('B' . $row, $item['Nome']);
-        $sheet->setCellValue('C' . $row, $item['CategoriaNome']);
-        $sheet->setCellValue('D' . $row, $item['Quantidade']);
-        $sheet->setCellValue('E' . $row, $item['Valor']);
-        $row++;
+        fputcsv($output, [
+            $item['ID'],
+            $item['Nome'],
+            $item['CategoriaNome'] ?? 'N/A',
+            $item['Quantidade'],
+            number_format($item['Valor'], 2, ',', '.')
+        ], ';');
     }
     
-    // Gerar arquivo
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="itens.xlsx"');
-    
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    $writer->save('php://output');
+    fclose($output);
     exit;
 }
 ?>

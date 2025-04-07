@@ -1,4 +1,7 @@
 <?php
+ini_set('memory_limit', '1024M'); // Aumenta para 1GB
+ini_set('max_execution_time', 300); // Aumenta o tempo limite para 5 minutos
+
 require_once 'config.php';
 require_once 'categorias.php';
 require_once 'itens.php';
@@ -53,10 +56,10 @@ if (isset($_GET['action'])) {
 
         // Exportação
         case 'export_categorias':
-            exportarCategoriasXLSX();
+            exportarCategoriasCSV();
             break;
         case 'export_itens':
-            exportarItensXLSX();
+            exportarItensCSV();
             break;
     }
     header('Location: index.php');

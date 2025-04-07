@@ -1,4 +1,6 @@
 <?php
+ini_set('memory_limit', '1024M'); // Aumenta para 1GB
+ini_set('max_execution_time', 300); // Aumenta o tempo limite para 5 minutos
 spl_autoload_register(function ($class) {
     $prefixes = [
         'PhpOffice\\PhpSpreadsheet\\' => __DIR__ . '/src/PhpOffice/PhpSpreadsheet/',

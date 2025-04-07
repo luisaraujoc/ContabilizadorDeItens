@@ -29,43 +29,29 @@ function deletarCategoria($id) {
     return $stmt->execute([$id]);
 }
 
-function exportarCategoriasXLSX() {
-    require_once 'autoload.php';
-
-    // Desativa o uso de cache
-    \PhpOffice\PhpSpreadsheet\Settings::setCache(null);
-    
+function exportarCategoriasCSV() {
     $categorias = listarCategorias();
     
-    try {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        
-        // Cabeçalhos
-        $sheet->setCellValue('A1', 'ID');
-        $sheet->setCellValue('B1', 'Código');
-        $sheet->setCellValue('C1', 'Nome');
-        
-        // Dados
-        $row = 2;
-        foreach ($categorias as $categoria) {
-            $sheet->setCellValue('A' . $row, $categoria['idCategoria']);
-            $sheet->setCellValue('B' . $row, $categoria['CodCategoria']);
-            $sheet->setCellValue('C' . $row, $categoria['Nome']);
-            $row++;
-        }
-        
-        // Gerar arquivo
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="categorias.xlsx"');
-        header('Cache-Control: max-age=0');
-        
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
-        
-    } catch (Exception $e) {
-        die("Erro ao exportar: " . $e->getMessage());
+    // Configurar headers para download CSV
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="categorias.csv"');
+    
+    // Criar output stream
+    $output = fopen('php://output', 'w');
+    
+    // Escrever cabeçalhos
+    fputcsv($output, ['ID', 'Código', 'Nome'], ';');
+    
+    // Escrever dados
+    foreach ($categorias as $categoria) {
+        fputcsv($output, [
+            $categoria['idCategoria'],
+            $categoria['CodCategoria'],
+            $categoria['Nome']
+        ], ';');
     }
+    
+    fclose($output);
+    exit;
 }
 ?>
